@@ -1,3 +1,5 @@
+[![](https://jitpack.io/v/matfax/pb-scala.svg)](https://jitpack.io/#matfax/pb-scala)
+
 # Terminal progress bar for Scala
 
 Console progress bar for Scala Inspired from [pb](http://github.com/cheggaaa/pb).
@@ -20,19 +22,4 @@ object Main {
     println("done")
   }
 }
-```
-
-## Gradle
-```
-	allprojects {
-		repositories {
-			...
-			maven { url "https://jitpack.io" }
-		}
-	}
-```
-```
-	dependencies {
-		compile 'com.github.User:Repo:Tag'
-	}
 ```
