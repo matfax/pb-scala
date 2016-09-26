@@ -1,10 +1,14 @@
-package pb
+package com.github.pbscala
+
 import org.scalatest._
 
 trait MockOutput extends Output {
   var messages: Seq[String] = Seq()
 
-  override def print(s: String) = messages = messages :+ s
+  override def print(s: String): String = {
+    messages = messages :+ s
+    s
+  }
 }
 
 class ProgressBarTest extends WordSpec with Matchers {
@@ -17,13 +21,14 @@ class ProgressBarTest extends WordSpec with Matchers {
         pb.current should be (10)
         pb.messages.last should (
           startWith ("\r10 / 100") and
-          endWith regex "10.00 % (\\d+)/s (\\d+s *)*".r)
+            endWith regex "10.00 % (\\d+)/s (\\d+s *)* ".r)
       }
     }
     "Using += operator" should {
       "increment `current` in n" in {
         var pb = new ProgressBar(100) with MockOutput
         pb+= 10
+        pb.draw()
         pb.current should be (10)
       }
     }
@@ -46,6 +51,7 @@ class ProgressBarTest extends WordSpec with Matchers {
       "replace bar box format" in {
         pb.format("[-> ]")
         pb += 1
+        pb.draw()
         pb.messages.last should include regex "\\[-+> +\\]".r
       }
     }

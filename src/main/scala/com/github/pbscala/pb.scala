@@ -1,21 +1,15 @@
-package pb
+package com.github.pbscala
+
 import com.github.nscala_time.time.Imports._
-import jline.{TerminalFactory}
+import com.github.pbscala.Units._
+import jline.TerminalFactory
 
-/** Output type format, indicate which format wil be used in
- *  the speed box.
- */
-object Units extends Enumeration {
-  type Units = Value
-  val Default, Bytes = Value
-}
-import Units._
-
-/** We're using Output as a trait of ProgressBar, so be able
- *  to mock the tty in the tests(i.e: override `print(...)`)
- */
+/**
+  * We're using Output as a trait of ProgressBar, so be able
+  * to mock the tty in the tests(i.e: override `print(...)`)
+  */
 trait Output {
-  def print(s: String) = Console.print(s)
+  def print(s: String): String = print(s)
 }
 
 object ProgressBar {
@@ -33,46 +27,42 @@ object ProgressBar {
   }
 }
 
-/** By calling new ProgressBar with Int as a total, you'll
- *  create a new ProgressBar with default configuration.
- */
+/**
+  * By calling new ProgressBar with Int as a total, you'll
+  * create a new ProgressBar with default configuration.
+  */
 class ProgressBar(_total: Int) extends Output {
   val total = _total
   var current = 0
+  var isFinish = false
+  var showBar, showSpeed, showPercent, showCounter, showTimeLeft = true
   private var startTime = DateTime.now
   private var units = Units.Default
   private var barStart, barCurrent, barCurrentN, barRemain, barEnd = ""
-  var isFinish = false
-  var showBar, showSpeed, showPercent, showCounter, showTimeLeft = true
 
   format(ProgressBar.Format)
-  
-  /** Add to current value
-   *  
-   *  @param          i the number to add to current value
-   *  @return         current value
-   */
-  def add(i: Int): Int = {
+
+  /**
+    * Add value using += operator without drawing.
+    */
+  def +=(i: Int): Int = {
     current += i
-    if (current <= total) draw()
     current
   }
 
-  /** Add value using += operator
-   */
-  def +=(i: Int): Int = add(i)
-
-  /** Set Units size
-   *  the default is simple numbers, but you can use Bytes type instead.
-   */
+  /**
+    * Set Units size
+    * the default is simple numbers, but you can use Bytes type instead.
+    */
   def setUnits(u: Units) = units = u
 
-  /** Set custom format to the drawing bar, default is `[=>-]`
-   */
+  /**
+    * Set custom format to the drawing bar, default is `[=>-]`
+    */
   def format(fmt: String) {
     if (fmt.length >= 5) {
       val v = fmt.split("").toList
-      barStart = v(0)
+      barStart = v.head
       barCurrent = v(1)
       barCurrentN = v(2)
       barRemain = v(3)
@@ -80,8 +70,35 @@ class ProgressBar(_total: Int) extends Output {
     }
   }
 
-  private def draw() {
-    val width = TerminalFactory.get().getWidth()
+  /**
+    * Calling finish manually will set current to total and draw
+    * the last time
+    */
+  def finish() {
+    if (current < total) add(total - current)
+    println()
+    isFinish = true
+  }
+
+  /**
+    * Add to current value and draw.
+    *
+    * @param          i the number to add to current value
+    * @return current value
+    */
+  def add(i: Int): ProgressBar = {
+    current += i
+    draw()
+    this
+  }
+
+  def draw(): ProgressBar = {
+    val uncheckedWidth = TerminalFactory.get().getWidth
+    val width = uncheckedWidth < 10 match {
+      case true => 120
+      case false => uncheckedWidth
+    }
+
     var prefix, base, suffix = ""
     // percent box
     if (showPercent) {
@@ -103,7 +120,8 @@ class ProgressBar(_total: Int) extends Output {
       val left = (fromStart / current) * (total - current)
       val dur = Duration.millis(Math.ceil(left).toLong)
       if (dur.seconds > 0) {
-        if (dur.seconds < 1.minutes.seconds) suffix += "%ds".format(dur.seconds)
+        if (dur.seconds < 1.minutes.seconds)
+          suffix += "%ds".format(dur.seconds)
         else suffix += "%dm".format(dur.minutes)
       }
     }
@@ -111,7 +129,9 @@ class ProgressBar(_total: Int) extends Output {
     if (showCounter) {
       prefix += (units match {
         case Default => "%d / %d ".format(current, total)
-        case Bytes => "%s / %s ".format(ProgressBar.kbFmt(current), ProgressBar.kbFmt(total))
+        case Bytes =>
+          "%s / %s ".format(ProgressBar.kbFmt(current),
+            ProgressBar.kbFmt(total))
       })
     }
     // bar box
@@ -136,14 +156,6 @@ class ProgressBar(_total: Int) extends Output {
     }
     // print
     print("\r" + out)
-  }
-
-  /** Calling finish manually will set current to total and draw
-   *  the last time
-   */
-  def finish() {
-    if (current < total) add(total - current)
-    println()
-    isFinish = true
+    this
   }
 }
