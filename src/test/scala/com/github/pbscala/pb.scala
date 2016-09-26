@@ -5,9 +5,8 @@ import org.scalatest._
 trait MockOutput extends Output {
   var messages: Seq[String] = Seq()
 
-  override def print(s: String): String = {
+  override def printit(s: String) {
     messages = messages :+ s
-    s
   }
 }
 

@@ -9,7 +9,7 @@ import jline.TerminalFactory
   * to mock the tty in the tests(i.e: override `print(...)`)
   */
 trait Output {
-  def print(s: String): String = print(s)
+  def printit(s: String) = print(s)
 }
 
 object ProgressBar {
@@ -94,7 +94,7 @@ class ProgressBar(_total: Int) extends Output {
 
   def draw(): ProgressBar = {
     val uncheckedWidth = TerminalFactory.get().getWidth
-    val width = uncheckedWidth < 10 match {
+    val width = uncheckedWidth < 80 match {
       case true => 120
       case false => uncheckedWidth
     }
@@ -154,8 +154,9 @@ class ProgressBar(_total: Int) extends Output {
     if (out.length < width) {
       out += " " * (width - out.length)
     }
+    val msg = "\r" + out
     // print
-    print("\r" + out)
+    printit(msg)
     this
   }
 }
