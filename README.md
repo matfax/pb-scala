@@ -11,12 +11,28 @@ object Main {
   def main(args: Array[String]) {
     var count = 1000
     var pb = new ProgressBar(count)
+    // Default is true for all fields
     pb.showSpeed = false
     for (_ <- 1 to count) {
-      pb += 1
+      pb.add(1)
       Thread.sleep(10)
     }
     println("done")
   }
 }
+```
+
+## Gradle
+```
+	allprojects {
+		repositories {
+			...
+			maven { url "https://jitpack.io" }
+		}
+	}
+```
+```
+	dependencies {
+		compile 'com.github.User:Repo:Tag'
+	}
 ```
