@@ -94,7 +94,7 @@ class ProgressBar(_total: Int) extends Output {
 
   def draw(): ProgressBar = {
     val uncheckedWidth = TerminalFactory.get().getWidth
-    val width = uncheckedWidth < 80 match {
+    val width = uncheckedWidth < 80 || uncheckedWidth > 240 match {
       case true => 120
       case false => uncheckedWidth
     }
