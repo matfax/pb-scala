@@ -37,7 +37,7 @@ class ProgressBarTest extends WordSpec with Matchers {
         pb.finish()
         pb.current should be (pb.total)
         pb.isFinish should be (true)
-        pb.messages.size should be (1)
+        pb.messages.size should be(2)
       }
     }
     "Set format" should {

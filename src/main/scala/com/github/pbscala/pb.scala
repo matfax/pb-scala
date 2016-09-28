@@ -46,7 +46,12 @@ class ProgressBar(_total: Int) extends Output {
     * Add value using += operator without drawing.
     */
   def +=(i: Int): Int = {
-    current += i
+    if (!isFinish) {
+      current += i
+      if (current == total) {
+        finish()
+      }
+    }
     current
   }
 
@@ -76,8 +81,9 @@ class ProgressBar(_total: Int) extends Output {
     */
   def finish() {
     if (current < total) add(total - current)
-    println()
     isFinish = true
+    draw()
+    println()
   }
 
   /**
@@ -87,14 +93,20 @@ class ProgressBar(_total: Int) extends Output {
     * @return current value
     */
   def add(i: Int): ProgressBar = {
-    current += i
-    draw()
+    if (!isFinish) {
+      current += i
+      if (current == total) {
+        finish()
+      } else {
+        draw()
+      }
+    }
     this
   }
 
   def draw(): ProgressBar = {
     val uncheckedWidth = TerminalFactory.get().getWidth
-    val width = uncheckedWidth < 80 || uncheckedWidth > 240 match {
+    val width = uncheckedWidth < 80 || uncheckedWidth > 360 match {
       case true => 120
       case false => uncheckedWidth
     }
@@ -106,7 +118,7 @@ class ProgressBar(_total: Int) extends Output {
       suffix += " %.2f %% ".format(percent)
     }
     // speed box
-    if (showSpeed) {
+    if (showSpeed && !isFinish) {
       val fromStart = (startTime to DateTime.now).millis.toFloat
       val speed = current / (fromStart / 1.seconds.millis)
       suffix += (units match {
@@ -115,7 +127,7 @@ class ProgressBar(_total: Int) extends Output {
       })
     }
     // time left box
-    if (showTimeLeft) {
+    if (showTimeLeft && !isFinish) {
       val fromStart = (startTime to DateTime.now).millis.toFloat
       val left = (fromStart / current) * (total - current)
       val dur = Duration.millis(Math.ceil(left).toLong)
