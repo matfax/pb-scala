@@ -2,6 +2,9 @@
 
 # Terminal progress bar for Scala
 
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/5b2f3bb9815141fe9e7e97f025a8bd90)](https://www.codacy.com/app/matfax/pb-scala?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=matfax/pb-scala&amp;utm_campaign=badger)
+
 Console progress bar for Scala Inspired from [pb](http://github.com/cheggaaa/pb).
 
 ![Screenshot](https://github.com/a8m/pb-scala/blob/master/gif/pb_rec.gif)
